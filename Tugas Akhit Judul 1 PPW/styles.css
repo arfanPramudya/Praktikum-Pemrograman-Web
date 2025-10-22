@@ -1,4 +1,4 @@
-/* SMOOTH SCROLL (TANPA JAVASCRIPT) */
+/* SMOOTH SCROLL */
 html {
     scroll-behavior: smooth;
 }
@@ -12,8 +12,8 @@ html {
 
 body {
     font-family: 'Inter', sans-serif;
-    background-color: #050A0D;
-    color: #6E7273;
+    background-color: #0F1419;
+    color: #A8AAAC;
     line-height: 1.6;
 }
 
@@ -62,11 +62,11 @@ a:hover {
     top: 0;
     left: 0;
     width: 100%;
-    background-color: rgba(5, 10, 13, 0.85);
+    background-color: rgba(15, 20, 25, 0.9);
     backdrop-filter: blur(10px);
     padding: 1rem 0;
     z-index: 100;
-    border-bottom: 1px solid #3B3F40;
+    border-bottom: 1px solid #2A2D30;
 }
 
 .navbar .container {
@@ -91,7 +91,7 @@ a:hover {
 }
 
 .navbar-menu a {
-    color: #6E7273;
+    color: #A8AAAC;
     font-weight: 500;
     transition: color 0.3s ease;
 }
@@ -104,7 +104,7 @@ a:hover {
 section {
     min-height: 100vh;
     padding: 8rem 0 4rem 0;
-    border-bottom: 1px solid #3B3F40;
+    border-bottom: 1px solid #2A2D30;
 }
 
 /* Bagian #home (Hero Section) */
@@ -172,10 +172,10 @@ section {
 }
 
 .skill-category {
-    background: #0D1826;
+    background: #141921;
     padding: 2rem;
     border-radius: 8px;
-    border: 1px solid #3B3F40;
+    border: 1px solid #2A2D30;
 }
 
 .skill-category h3 {
@@ -223,14 +223,14 @@ section {
     width: 120px;
     height: 100px;
     font-size: 4rem;
-    color: #6E7273;
+    color: #A8AAAC;
     transition: all 0.3s ease;
 }
 
 .tech-icon p {
     font-size: 0.9rem;
     margin-top: 0.75rem;
-    color: #6E7273;
+    color: #A8AAAC;
     margin-bottom: 0;
 }
 
@@ -248,12 +248,12 @@ section {
 }
 
 .project-card {
-    background: #0D1826;
+    background: #141921;
     border-radius: 8px;
     overflow: hidden;
     display: flex;
     flex-direction: column;
-    border: 1px solid #3B3F40;
+    border: 1px solid #2A2D30;
     transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
@@ -264,11 +264,11 @@ section {
 
 .project-image-placeholder {
     height: 200px;
-    background-color: #050A0D;
+    background-color: #0F1419;
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #6E7273;
+    color: #A8AAAC;
     font-style: italic;
     border-bottom: 2px solid #3E5902;
 }
@@ -293,7 +293,7 @@ section {
 }
 
 .project-tags li {
-    background-color: #050A0D;
+    background-color: #0F1419;
     color: #3E5902;
     padding: 5px 10px;
     border-radius: 4px;
@@ -310,8 +310,8 @@ section {
 }
 
 .certificate-card {
-    background: #0D1826;
-    border: 1px solid #3B3F40;
+    background: #141921;
+    border: 1px solid #2A2D30;
     border-radius: 8px;
     padding: 1.5rem;
     text-align: center;
@@ -336,7 +336,7 @@ section {
 
 .certificate-card p {
     font-size: 0.9rem;
-    color: #6E7273;
+    color: #A8AAAC;
     margin-bottom: 0;
 }
 
@@ -374,9 +374,9 @@ Footer
 footer {
     padding: 2rem 0;
     text-align: center;
-    background-color: #050A0D;
-    border-top: 1px solid #3B3F40;
-    color: #6E7273;
+    background-color: #0F1419;
+    border-top: 1px solid #2A2D30;
+    color: #A8AAAC;
     font-size: 0.9rem;
 }
 
@@ -389,7 +389,7 @@ footer {
 }
 
 .footer-links a {
-    color: #6E7273;
+    color: #A8AAAC;
     font-size: 1.5rem;
 }
 
