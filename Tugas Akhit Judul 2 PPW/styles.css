@@ -323,6 +323,16 @@ section {
     border-bottom: 2px solid #888888;
 }
 
+/* Crop dan proporsional gambar di card proyek */
+.project-image-placeholder img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 8px;
+    box-shadow: 0 2px 12px rgba(22,33,62,0.10);
+    display: block;
+}
+
 .project-content {
     padding: 1.5rem;
     flex-grow: 1;
