@@ -527,7 +527,7 @@ Skill Badge di Hero Section
     max-width: 600px;
 }
 .skill-badge {
-    background: linear-gradient(135deg, #1a1a2e 0%, #64ffda 100%);
+    background: linear-gradient(135deg, #a259ff 0%, #64ffda 100%);
     color: #121212;
     font-weight: 600;
     font-size: 1.2rem;
@@ -536,12 +536,13 @@ Skill Badge di Hero Section
     box-shadow: 0 2px 12px rgba(22,33,62,0.10);
     border: 2px solid #64ffda;
     letter-spacing: 0.5px;
-    transition: background 0.3s, color 0.3s;
+    transition: background 0.3s, color 0.3s, box-shadow 0.3s;
     margin-bottom: 0.5rem;
 }
 .skill-badge:hover {
-    background: linear-gradient(135deg, #64ffda 0%, #1a1a2e 100%);
+    background: linear-gradient(135deg, #64ffda 0%, #a259ff 100%);
     color: #fff;
+    box-shadow: 0 0 20px #64ffda;
 }
 @media (max-width: 768px) {
     .highlight-badges {
