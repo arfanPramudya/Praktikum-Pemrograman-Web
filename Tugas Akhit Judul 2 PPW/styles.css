@@ -510,3 +510,46 @@ Responsif (Mobile)
         margin: 0 auto;
     }
 }
+
+
+/* ========================================
+Skill Badge di Hero Section
+======================================== */
+.hero-highlight-badges {
+    margin-top: 2.5rem;
+    margin-bottom: 0.5rem;
+}
+.highlight-badges {
+    display: flex;
+    gap: 2rem;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    max-width: 600px;
+}
+.skill-badge {
+    background: linear-gradient(135deg, #1a1a2e 0%, #64ffda 100%);
+    color: #121212;
+    font-weight: 600;
+    font-size: 1.2rem;
+    padding: 1rem 2.5rem;
+    border-radius: 32px;
+    box-shadow: 0 2px 12px rgba(22,33,62,0.10);
+    border: 2px solid #64ffda;
+    letter-spacing: 0.5px;
+    transition: background 0.3s, color 0.3s;
+    margin-bottom: 0.5rem;
+}
+.skill-badge:hover {
+    background: linear-gradient(135deg, #64ffda 0%, #1a1a2e 100%);
+    color: #fff;
+}
+@media (max-width: 768px) {
+    .highlight-badges {
+        gap: 1rem;
+        max-width: 100%;
+    }
+    .skill-badge {
+        font-size: 1rem;
+        padding: 0.7rem 1.5rem;
+    }
+}
