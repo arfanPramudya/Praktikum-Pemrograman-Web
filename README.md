@@ -12,12 +12,12 @@ Ini adalah source code untuk website portfolio pribadi saya, yang menampilkan pr
 * Section "About Me"
 * Galeri Proyek (Projects)
 * Formulir Kontak (Contact)
-* Desain Responsif (Jika diterapkan)
+* Desain Responsif 
 
 ## Cara Menjalankan Proyek Ini Secara Lokal
 
 1.  Clone repository ini:
     ```bash
-    git clone [git@github.com:arfanPramudya/Praktikum-Pemrograman-Web.git)
+    git clone https://github.com/arfanPramudya/Praktikum-Pemrograman-Web.git
     ```
 2.  Buka file `index.html` di browser favorit Anda.
