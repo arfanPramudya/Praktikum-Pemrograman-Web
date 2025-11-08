@@ -9,38 +9,60 @@
   <title>QuantumLeap Solutions - Nexus</title>
 </head>
 <body class="bg-slate-900">
+  <script>
+    // Sidebar Toggle
+    document.addEventListener('DOMContentLoaded', function() {
+      const menuBtn = document.getElementById('menu-btn');
+      const sidebar = document.getElementById('mobile-menu');
+      
+      if (menuBtn && sidebar) {
+        menuBtn.addEventListener('click', function() {
+          sidebar.classList.toggle('hidden');
+        });
+        
+        // Close sidebar when link is clicked
+        const sidebarLinks = sidebar.querySelectorAll('a');
+        sidebarLinks.forEach(link => {
+          link.addEventListener('click', function() {
+            sidebar.classList.add('hidden');
+          });
+        });
+      }
+    });
+  </script>
   <header class="bg-slate-900 border-b border-slate-700">
   <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
     <div class="flex h-16 items-center justify-between">
       <div class="md:flex md:items-center md:gap-12">
-        <a class="block text-transparent bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600 bg-clip-text text-2xl font-bold" href="#">
+        <a class="block text-transparent bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600 bg-clip-text text-2xl font-bold" href="#home">
           QuantumLeap
         </a>
       </div>
 
+      <!-- Navigasi Menu -->
       <div class="hidden md:block">
         <nav aria-label="Global">
           <ul class="flex items-center gap-6 text-sm">
             <li>
-              <a class="text-gray-400 transition hover:text-cyan-400" href="#">
+              <a class="text-gray-400 transition hover:text-cyan-400" href="#home">
                 Home
               </a>
             </li>
 
             <li>
-              <a class="text-gray-400 transition hover:text-cyan-400" href="#">
+              <a class="text-gray-400 transition hover:text-cyan-400" href="#features">
                 Fitur
               </a>
             </li>
 
             <li>
-              <a class="text-gray-400 transition hover:text-cyan-400" href="#">
+              <a class="text-gray-400 transition hover:text-cyan-400" href="#about">
                 Tentang Kami
               </a>
             </li>
 
             <li>
-              <a class="text-gray-400 transition hover:text-cyan-400" href="#">
+              <a class="text-gray-400 transition hover:text-cyan-400" href="#contact">
                 Kontak
               </a>
             </li>
@@ -48,6 +70,7 @@
         </nav>
       </div>
 
+      <!-- Login dan Daftar Buttom -->
       <div class="flex items-center gap-4">
         <div class="sm:flex sm:gap-4">
           <a class="rounded-md bg-gradient-to-r from-blue-600 to-purple-600 px-5 py-2.5 text-sm font-medium text-white shadow-sm hover:shadow-lg hover:shadow-purple-500/50 transition" href="#">
@@ -62,7 +85,7 @@
         </div>
 
         <div class="block md:hidden">
-          <button class="rounded-sm bg-slate-800 p-2 text-cyan-400 transition hover:bg-slate-700">
+          <button id="menu-btn" class="rounded-sm bg-slate-800 p-2 text-cyan-400 transition hover:bg-slate-700">
             <svg xmlns="http://www.w3.org/2000/svg" class="size-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
               <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"></path>
             </svg>
@@ -73,10 +96,41 @@
   </div>
 </header>
 
+  <!-- Mobile Sidebar Menu -->
+  <nav id="mobile-menu" class="hidden fixed top-16 left-0 right-0 bg-slate-800 border-b border-slate-700 z-40 md:hidden">
+    <ul class="flex flex-col gap-0">
+      <li class="border-b border-slate-700">
+        <a class="block px-4 py-3 text-gray-400 transition hover:text-cyan-400 hover:bg-slate-700" href="#home">
+          Home
+        </a>
+      </li>
+      <li class="border-b border-slate-700">
+        <a class="block px-4 py-3 text-gray-400 transition hover:text-cyan-400 hover:bg-slate-700" href="#features">
+          Fitur
+        </a>
+      </li>
+      <li class="border-b border-slate-700">
+        <a class="block px-4 py-3 text-gray-400 transition hover:text-cyan-400 hover:bg-slate-700" href="#about">
+          Tentang Kami
+        </a>
+      </li>
+      <li class="border-b border-slate-700">
+        <a class="block px-4 py-3 text-gray-400 transition hover:text-cyan-400 hover:bg-slate-700" href="#contact">
+          Kontak
+        </a>
+      </li>
+      <li>
+        <a class="block px-4 py-3 text-sm font-medium text-gray-400 transition hover:text-cyan-400 hover:bg-slate-700" href="#">
+          Daftar
+        </a>
+      </li>
+    </ul>
+  </nav>
+
   <!-- Hero Section Start -->
    <!-- Include this script tag or install `@tailwindplus/elements` via npm: -->
 <!-- <script src="https://cdn.jsdelivr.net/npm/@tailwindplus/elements@1" type="module"></script> -->
-<div class="bg-slate-900">
+<div id="home" class="bg-gradient-to-br from-slate-900 via-blue-900/20 to-slate-950">
   <div class="relative isolate px-6 pt-14 lg:px-8">
     <div aria-hidden="true" class="absolute inset-x-0 -top-40 -z-10 transform-gpu overflow-hidden blur-3xl sm:-top-80">
       <div style="clip-path: polygon(74.1% 44.1%, 100% 61.6%, 97.5% 26.9%, 85.5% 0.1%, 80.7% 2%, 72.5% 32.5%, 60.2% 62.4%, 52.4% 68.1%, 47.5% 58.3%, 45.2% 34.5%, 27.5% 76.7%, 0.1% 64.9%, 17.9% 100%, 27.6% 76.8%, 76.1% 97.7%, 74.1% 44.1%)" class="relative left-[calc(50%-11rem)] aspect-1155/678 w-144.5 -translate-x-1/2 rotate-30 bg-gradient-to-tr from-cyan-400 via-blue-500 to-purple-600 opacity-30 sm:left-[calc(50%-30rem)] sm:w-288.75"></div>
@@ -91,8 +145,8 @@
         <h1 class="text-5xl font-semibold tracking-tight text-balance text-white sm:text-7xl">Revolusikan Cara Tim Anda Bekerja.</h1>
         <p class="mt-8 text-lg font-medium text-pretty text-gray-400 sm:text-xl/8">Nexus adalah platform manajemen proyek cerdas yang menggunakan AI untuk mengotomatiskan tugas, memprediksi deadline, dan meningkatkan kolaborasi.</p>
         <div class="mt-10 flex items-center justify-center gap-x-6">
-          <a href="#" class="rounded-md bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-lg hover:shadow-purple-500/50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-purple-500 transition">Jadwalkan Demo Gratis</a>
-          <a href="#" class="text-sm/6 font-semibold text-white hover:text-cyan-400 transition">Pelajari lebih lanjut <span aria-hidden="true">→</span></a>
+          <a href="#contact" class="rounded-md bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-lg hover:shadow-purple-500/50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-purple-500 transition">Jadwalkan Demo Gratis</a>
+          <a href="#features" class="text-sm/6 font-semibold text-white hover:text-cyan-400 transition">Pelajari lebih lanjut <span aria-hidden="true">→</span></a>
         </div>
       </div>
     </div>
@@ -104,7 +158,7 @@
    <!-- Hero Section End -->
 
       <!-- Features Section Start -->
-    <div class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 bg-slate-900">
+    <div id="features" class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 bg-gradient-to-br from-slate-900 via-purple-900/10 to-slate-950">
   <div class="mx-auto max-w-lg text-center">
     <h2 class="text-3xl/tight font-bold text-white sm:text-4xl">Fitur Unggulan untuk Pertumbuhan</h2>
 
@@ -159,8 +213,8 @@
 </div>
     <!-- Features Section End -->
 
-    <!-- About Section Start -->
-     <section class="overflow-hidden bg-slate-800 sm:grid sm:grid-cols-2 sm:items-center">
+     <!-- About Section Start -->
+     <section id="about" class="overflow-hidden bg-gradient-to-bl from-slate-800 via-blue-900/20 to-slate-950 sm:grid sm:grid-cols-2 sm:items-center">
   <div class="p-8 md:p-12 lg:px-16 lg:py-24">
     <div class="mx-auto max-w-xl text-center ltr:sm:text-left rtl:sm:text-right">
       <h2 class="text-2xl font-bold text-white md:text-3xl">
@@ -172,7 +226,7 @@
       </p>
 
       <div class="mt-4 md:mt-8">
-        <a href="#" class="inline-block rounded-sm bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600 px-12 py-3 text-sm font-medium text-white transition hover:shadow-lg hover:shadow-purple-500/50 focus:ring-2 focus:ring-cyan-400 focus:outline-hidden">
+        <a href="#contact" class="inline-block rounded-sm bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600 px-12 py-3 text-sm font-medium text-white transition hover:shadow-lg hover:shadow-purple-500/50 focus:ring-2 focus:ring-cyan-400 focus:outline-hidden">
           Mulai Sekarang
         </a>
       </div>
@@ -185,7 +239,7 @@
 
 
      <!-- Contact Section Start -->
-      <div class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 bg-slate-900">
+      <div id="contact" class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 bg-gradient-to-br from-slate-900 via-cyan-900/10 to-slate-950">
   <div class="grid grid-cols-1 gap-8 md:grid-cols-2">
     <div class="md:py-4">
       <h2 class="text-2xl font-bold text-white sm:text-3xl">Siap Memulai?</h2>
@@ -261,10 +315,10 @@
       <!-- Contact Section End -->
 
       <!-- Footer Section Start -->
-       <footer class="bg-slate-950 border-t border-slate-800">
+       <footer class="bg-gradient-to-r from-slate-950 via-blue-950/30 to-slate-950 border-t border-slate-800">
   <div class="relative mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8 lg:pt-24">
     <div class="absolute end-4 top-4 sm:end-6 sm:top-6 lg:end-8 lg:top-8">
-      <a class="inline-block rounded-full bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600 p-2 text-white shadow-lg hover:shadow-purple-500/50 transition sm:p-3 lg:p-4" href="#MainContent">
+      <a class="inline-block rounded-full bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600 p-2 text-white shadow-lg hover:shadow-purple-500/50 transition sm:p-3 lg:p-4" href="#home">
         <span class="sr-only">Kembali ke atas</span>
 
         <svg xmlns="http://www.w3.org/2000/svg" class="size-5" viewBox="0 0 20 20" fill="currentColor">
@@ -276,7 +330,7 @@
     <div class="lg:flex lg:items-end lg:justify-between">
       <div>
         <div class="flex justify-center text-transparent bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600 bg-clip-text lg:justify-start">
-          <span class="text-2xl font-bold">QuantumLeap</span>
+          <a href="#home" class="text-2xl font-bold">QuantumLeap</a>
         </div>
 
         <p class="mx-auto mt-6 max-w-md text-center leading-relaxed text-gray-400 lg:text-left">
@@ -286,13 +340,13 @@
 
       <ul class="mt-12 flex flex-wrap justify-center gap-6 md:gap-8 lg:mt-0 lg:justify-end lg:gap-12">
         <li>
-          <a class="text-gray-400 transition hover:text-cyan-400" href="#">
+          <a class="text-gray-400 transition hover:text-cyan-400" href="#about">
             Tentang
           </a>
         </li>
 
         <li>
-          <a class="text-gray-400 transition hover:text-cyan-400" href="#">
+          <a class="text-gray-400 transition hover:text-cyan-400" href="#features">
             Fitur
           </a>
         </li>
