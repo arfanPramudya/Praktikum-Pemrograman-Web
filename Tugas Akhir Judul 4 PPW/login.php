@@ -1,3 +1,36 @@
+<?php
+session_start();
+
+// Guard: login langsung ke dashboard
+if (isset($_SESSION['logged_in']) && $_SESSION['logged_in'] === true) {
+    header("Location: dashboard.php");
+    exit;
+}
+
+$error_message = "";
+
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    $username = $_POST['username'] ?? '';
+    $password = $_POST['password'] ?? '';
+    
+    // Validasi hardcoded
+    if ($username == "admin" && $password == "123") {
+        $_SESSION['logged_in'] = true;
+        $_SESSION['username'] = $username;
+        
+        // Inisialisasi array kontak jika belum ada
+        if (!isset($_SESSION['kontak'])) {
+            $_SESSION['kontak'] = [];
+        }
+        
+        header("Location: dashboard.php");
+        exit;
+    } else {
+        $error_message = "Username atau Password salah!";
+    }
+}
+?>
+
 <!DOCTYPE html>
 <html lang="id">
 <head>
