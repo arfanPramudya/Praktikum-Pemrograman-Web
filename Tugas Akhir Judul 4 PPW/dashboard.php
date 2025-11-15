@@ -1,3 +1,20 @@
+<?php
+session_start();
+
+// Guard: Cek login
+if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
+    header("Location: login.php");
+    exit;
+}
+
+$kontak_list = $_SESSION['kontak'] ?? [];
+$success_message = $_SESSION['success_message'] ?? '';
+$error_message = $_SESSION['error_message'] ?? '';
+
+unset($_SESSION['success_message']);
+unset($_SESSION['error_message']);
+?>
+
 <!DOCTYPE html>
 <html lang="id">
 <head>
