@@ -52,6 +52,44 @@ if ($kontak_ditemukan === null) {
             <form method="POST" action="proses_edit.php" class="space-y-4">
                 <input type="hidden" name="id" value="<?php echo htmlspecialchars($kontak_ditemukan['id']); ?>">
                 
+                <div>
+                    <label for="nama" class="block text-sm font-medium text-slate-800 mb-2">Nama</label>
+                    <input 
+                        type="text" 
+                        id="nama" 
+                        name="nama" 
+                        required 
+                        value="<?php echo htmlspecialchars($kontak_ditemukan['nama']); ?>"
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-600 text-slate-800"
+                        placeholder="Nama lengkap"
+                    >
+                </div>
+                
+                <div>
+                    <label for="email" class="block text-sm font-medium text-slate-800 mb-2">Email</label>
+                    <input 
+                        type="email" 
+                        id="email" 
+                        name="email" 
+                        required 
+                        value="<?php echo htmlspecialchars($kontak_ditemukan['email']); ?>"
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-600 text-slate-800"
+                        placeholder="email@example.com"
+                    >
+                </div>
+                
+                <div>
+                    <label for="telepon" class="block text-sm font-medium text-slate-800 mb-2">Telepon</label>
+                    <input 
+                        type="tel" 
+                        id="telepon" 
+                        name="telepon" 
+                        required 
+                        value="<?php echo htmlspecialchars($kontak_ditemukan['telepon']); ?>"
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-600 text-slate-800"
+                        placeholder="08123456789"
+                    >
+                </div>
                 
                 <div class="flex gap-4 pt-4">
                     <button 
