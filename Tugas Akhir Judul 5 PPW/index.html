@@ -1,77 +1,770 @@
 <!DOCTYPE html>
-<html lang="id">
+<html class="dark" lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aplikasi Kalkulator Interaktif</title>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>KalkulatorKu</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com" rel="preconnect"/>
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+    
+    <script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "primary": "#135bec",
+              "primary-dark": "#0f4bc4",
+            },
+            fontFamily: {
+              "display": ["Inter", "sans-serif"]
+            },
+            animation: {
+                'gradient-x': 'gradient-x 15s ease infinite',
+            },
+            keyframes: {
+                'gradient-x': {
+                    '0%, 100%': {
+                        'background-size': '200% 200%',
+                        'background-position': 'left center'
+                    },
+                    '50%': {
+                        'background-size': '200% 200%',
+                        'background-position': 'right center'
+                    },
+                },
+            }
+          },
+        },
+      }
+    </script>
+    <style>
+        .calculator-button {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 4rem;
+            width: 100%;
+            font-size: 1.5rem;
+            border-radius: 9999px;
+            cursor: pointer;
+            transition: transform 0.2s;
+            user-select: none;
+            border: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .calculator-button:active {
+            transform: scale(0.95);
+        }
+        .memory-button {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 2.5rem;
+            width: 100%;
+            font-size: 0.875rem;
+            font-weight: 600;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            user-select: none;
+            border: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .memory-button:active {
+            transform: scale(0.95);
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .history-scroll::-webkit-scrollbar {
+            width: 4px;
+        }
+        .history-scroll::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .history-scroll::-webkit-scrollbar-thumb {
+            background-color: #cbd5e1;
+            border-radius: 20px;
+        }
+        .dark .history-scroll::-webkit-scrollbar-thumb {
+            background-color: #475569;
+        }
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+        }
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .modal-content {
+            background: white;
+            border-radius: 1.5rem;
+            padding: 2rem;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+            transform: scale(0.95);
+            transition: transform 0.3s;
+        }
+        .modal-overlay.active .modal-content {
+            transform: scale(1);
+        }
+        .dark .modal-content {
+            background: #1e293b;
+            color: #e2e8f0;
+        }
+        .modal-header {
+            border-bottom: 1px solid #e2e8f0;
+            padding-bottom: 1rem;
+            margin-bottom: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .dark .modal-header {
+            border-color: #334155;
+        }
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #64748b;
+            transition: color 0.2s;
+        }
+        .modal-close:hover {
+            color: #1e293b;
+        }
+        .dark .modal-close:hover {
+            color: #e2e8f0;
+        }
+        .history-item-detail {
+            padding: 1.5rem;
+            background: #f1f5f9;
+            border-radius: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        .dark .history-item-detail {
+            background: #0f172a;
+        }
+        .history-expression {
+            font-size: 1rem;
+            color: #64748b;
+            margin-bottom: 0.5rem;
+        }
+        .dark .history-expression {
+            color: #94a3b8;
+        }
+        .history-result {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #1e293b;
+            word-break: break-all;
+        }
+        .dark .history-result {
+            color: #e2e8f0;
+        }
+        .history-actions {
+            display: flex;
+            gap: 0.75rem;
+        }
+        .history-actions button {
+            flex: 1;
+            padding: 0.75rem;
+            border: none;
+            border-radius: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-use {
+            background: #135bec;
+            color: white;
+        }
+        .btn-use:hover {
+            background: #0f4bc4;
+        }
+        .btn-close {
+            background: #e2e8f0;
+            color: #1e293b;
+        }
+        .btn-close:hover {
+            background: #cbd5e1;
+        }
+        .dark .btn-close {
+            background: #334155;
+            color: #e2e8f0;
+        }
+        .dark .btn-close:hover {
+            background: #475569;
+        }
+        .history-list-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 1rem;
+        }
+        .history-item-card {
+            padding: 1rem;
+            background: #f1f5f9;
+            border-radius: 0.75rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 2px solid transparent;
+        }
+        .dark .history-item-card {
+            background: #334155;
+        }
+        .history-item-card:hover {
+            border-color: #135bec;
+            transform: translateY(-2px);
+        }
+        .history-item-card-expr {
+            font-size: 0.875rem;
+            color: #64748b;
+            margin-bottom: 0.5rem;
+            text-align: center;
+        }
+        .dark .history-item-card-expr {
+            color: #94a3b8;
+        }
+        .history-item-card-result {
+            font-size: 1.25rem;
+            font-weight: bold;
+            color: #1e293b;
+            text-align: center;
+        }
+        .dark .history-item-card-result {
+            color: #e2e8f0;
+        }
+        .display-section {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            padding: 1.5rem 1.5rem 1.5rem 1.5rem;
+        }
+        .expression-display {
+            min-height: 1.5rem;
+            font-size: 0.875rem;
+            color: #64748b;
+            text-align: right;
+            overflow-x: auto;
+            overflow-y: hidden;
+            white-space: nowrap;
+            scrollbar-width: thin;
+            scrollbar-color: #cbd5e1 transparent;
+        }
+        .dark .expression-display {
+            color: #94a3b8;
+            scrollbar-color: #475569 transparent;
+        }
+        .expression-display::-webkit-scrollbar {
+            height: 3px;
+        }
+        .expression-display::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .expression-display::-webkit-scrollbar-thumb {
+            background-color: #cbd5e1;
+            border-radius: 2px;
+        }
+        .dark .expression-display::-webkit-scrollbar-thumb {
+            background-color: #475569;
+        }
+        .main-display {
+            text-align: right;
+            font-size: 6rem;
+            font-weight: 300;
+            color: #1e293b;
+            word-break: break-all;
+            min-height: 5rem;
+            line-height: 1.1;
+            letter-spacing: -0.05em;
+        }
+        .dark .main-display {
+            color: #e2e8f0;
+        }
+    </style>
 </head>
-<body class="bg-gray-100 h-screen flex items-center justify-center p-4 font-mono">
 
-    <main class="bg-white rounded-2xl shadow-2xl overflow-hidden flex flex-col md:flex-row w-full max-w-4xl">
+<!-- Gradient Background -->
+<body class="font-display transition-colors duration-500 bg-gradient-to-br from-blue-100 via-purple-100 to-pink-100 dark:from-slate-900 dark:via-blue-950 dark:to-slate-900 bg-[length:200%_200%] animate-gradient-x text-slate-800 dark:text-slate-200 min-h-screen flex flex-col overflow-hidden">
 
-        <section class="flex-1 p-6 border-r border-gray-200">
+<div class="relative flex h-full w-full flex-col grow">
+    <!-- Header -->
+    <header class="flex items-center justify-between px-4 sm:px-6 py-4 border-b border-white/20 dark:border-slate-800/50 backdrop-blur-sm z-10">
+        <div class="flex items-center gap-3 text-slate-900 dark:text-white">
+            <div class="size-6 text-primary">
+                <svg fill="none" viewbox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+                    <path clip-rule="evenodd" d="M24 18.4228L42 11.475V34.3663C42 34.7796 41.7457 35.1504 41.3601 35.2992L24 42V18.4228Z" fill="currentColor" fill-rule="evenodd"></path>
+                    <path clip-rule="evenodd" d="M24 8.18819L33.4123 11.574L24 15.2071L14.5877 11.574L24 8.18819ZM9 15.8487L21 20.4805V37.6263L9 32.9945V15.8487ZM27 37.6263V20.4805L39 15.8487V32.9945L27 37.6263ZM25.354 2.29885C24.4788 1.98402 23.5212 1.98402 22.646 2.29885L4.98454 8.65208C3.7939 9.08038 3 10.2097 3 11.475V34.3663C3 36.0196 4.01719 37.5026 5.55962 38.098L22.9197 44.7987C23.6149 45.0671 24.3851 45.0671 25.0803 44.7987L42.4404 38.098C43.9828 37.5026 45 36.0196 45 34.3663V11.475C45 10.2097 44.2061 9.08038 43.0155 8.65208L25.354 2.29885Z" fill="currentColor" fill-rule="evenodd"></path>
+                </svg>
+            </div>
+            <h2 class="text-xl font-bold tracking-tight">KalkulatorKu</h2>
+        </div>
+        
+        <div class="flex gap-2">
+            <button id="history-toggle" class="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full bg-white/50 hover:bg-white dark:bg-slate-800/50 dark:hover:bg-slate-700 transition-colors shadow-sm ring-1 ring-slate-900/5 dark:ring-white/10">
+                <span class="material-symbols-outlined text-slate-600 dark:text-slate-300">history</span>
+            </button>
+            <button id="theme-toggle" class="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full bg-white/50 hover:bg-white dark:bg-slate-800/50 dark:hover:bg-slate-700 transition-colors shadow-sm ring-1 ring-slate-900/5 dark:ring-white/10">
+                <span class="material-symbols-outlined text-xl dark:hidden text-slate-600">dark_mode</span>
+                <span class="material-symbols-outlined text-xl hidden dark:inline text-slate-300">light_mode</span>
+            </button>
+        </div>
+    </header>
+
+    <main class="flex flex-1 items-center justify-center p-4 relative">
+        <div class="flex flex-col md:flex-row gap-4 w-full max-w-4xl justify-center items-start">
             
-            <div class="bg-gray-900 rounded-lg p-4 mb-6 text-right text-white h-28 flex flex-col justify-end">
-                <div id="display-history" class="text-gray-400 text-sm h-6 overflow-hidden"></div>
-                <div id="display-current" class="text-4xl font-bold tracking-widest overflow-x-auto overflow-y-hidden whitespace-nowrap">0</div>
-            </div>
-
-            <div class="grid grid-cols-4 gap-2 mb-4">
-                <button class="calc-btn bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold py-2 rounded transition" data-action="memory-clear">MC</button>
-                <button class="calc-btn bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold py-2 rounded transition" data-action="memory-recall">MR</button>
-                <button class="calc-btn bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold py-2 rounded transition" data-action="memory-plus">M+</button>
-                <button class="calc-btn bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold py-2 rounded transition" data-action="memory-minus">M-</button>
-            </div>
-
-            <div class="grid grid-cols-4 gap-3">
-                <!-- Row 1: Clear & Delete -->
-                <button class="calc-btn col-span-1 bg-red-100 hover:bg-red-200 text-red-600 font-bold py-4 rounded text-lg" data-action="clear-entry">CE</button>
-                <button class="calc-btn col-span-1 bg-red-100 hover:bg-red-200 text-red-600 font-bold py-4 rounded text-lg" data-action="clear">C</button>
-                <button class="calc-btn col-span-2 bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-4 rounded text-lg" data-action="backspace">⌫</button>
-
-                <!-- Row 2 -->
-                <button class="calc-btn bg-white border border-gray-200 hover:bg-gray-50 text-gray-800 font-bold py-4 rounded text-xl shadow-sm" data-value="7">7</button>
-                <button class="calc-btn bg-white border border-gray-200 hover:bg-gray-50 text-gray-800 font-bold py-4 rounded text-xl shadow-sm" data-value="8">8</button>
-                <button class="calc-btn bg-white border border-gray-200 hover:bg-gray-50 text-gray-800 font-bold py-4 rounded text-xl shadow-sm" data-value="9">9</button>
-                <button class="calc-btn bg-blue-100 hover:bg-blue-200 text-blue-600 font-bold py-4 rounded text-xl" data-value="/">÷</button>
-
-                <!-- Row 3 -->
-                <button class="calc-btn bg-white border border-gray-200 hover:bg-gray-50 text-gray-800 font-bold py-4 rounded text-xl shadow-sm" data-value="4">4</button>
-                <button class="calc-btn bg-white border border-gray-200 hover:bg-gray-50 text-gray-800 font-bold py-4 rounded text-xl shadow-sm" data-value="5">5</button>
-                <button class="calc-btn bg-white border border-gray-200 hover:bg-gray-50 text-gray-800 font-bold py-4 rounded text-xl shadow-sm" data-value="6">6</button>
-                <button class="calc-btn bg-blue-100 hover:bg-blue-200 text-blue-600 font-bold py-4 rounded text-xl" data-value="*">×</button>
-
-                <!-- Row 4 -->
-                <button class="calc-btn bg-white border border-gray-200 hover:bg-gray-50 text-gray-800 font-bold py-4 rounded text-xl shadow-sm" data-value="1">1</button>
-                <button class="calc-btn bg-white border border-gray-200 hover:bg-gray-50 text-gray-800 font-bold py-4 rounded text-xl shadow-sm" data-value="2">2</button>
-                <button class="calc-btn bg-white border border-gray-200 hover:bg-gray-50 text-gray-800 font-bold py-4 rounded text-xl shadow-sm" data-value="3">3</button>
-                <button class="calc-btn bg-blue-100 hover:bg-blue-200 text-blue-600 font-bold py-4 rounded text-xl" data-value="-">-</button>
-
-                <!-- Row 5 -->
-                <button class="calc-btn bg-white border border-gray-200 hover:bg-gray-50 text-gray-800 font-bold py-4 rounded text-xl shadow-sm" data-value=".">.</button>
-                <button class="calc-btn bg-white border border-gray-200 hover:bg-gray-50 text-gray-800 font-bold py-4 rounded text-xl shadow-sm" data-value="0">0</button>
-                <button class="calc-btn bg-green-500 hover:bg-green-600 text-white font-bold py-4 rounded text-xl shadow-md" data-action="calculate">=</button>
-                <button class="calc-btn bg-blue-100 hover:bg-blue-200 text-blue-600 font-bold py-4 rounded text-xl" data-value="+">+</button>
-            </div>
-        </section>
-
-        <aside class="w-full md:w-72 bg-gray-50 p-6 border-t md:border-t-0 md:border-l border-gray-200 flex flex-col">
-            <div class="flex justify-between items-center mb-4 pb-2 border-b border-gray-200">
-                <h2 class="text-lg font-semibold text-gray-700">Riwayat</h2>
-                <button id="clear-history" class="text-xs text-red-500 hover:text-red-700 font-medium">Hapus Semua</button>
-            </div>
-            
-            <div id="history-list" class="history-scroll flex-1 overflow-y-auto space-y-3 pr-2 text-right">
-                <div class="p-3 bg-white rounded shadow-sm border border-gray-100">
-                    <div class="text-gray-500 text-xs">120 + 50</div>
-                    <div class="text-gray-800 font-bold text-lg">= 170</div>
-                </div>
-                <div class="p-3 bg-white rounded shadow-sm border border-gray-100 opacity-50">
-                    <div class="text-gray-500 text-xs">Riwayat Kosong</div>
+            <!-- History Modal -->
+            <div id="history-modal" class="modal-overlay">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3 style="font-size: 1.25rem; font-weight: bold;">Riwayat Perhitungan</h3>
+                        <button id="modal-close" class="modal-close">✕</button>
+                    </div>
+                    <div id="history-list-container" class="history-list-container">
+                        <div style="grid-column: 1 / -1; text-align: center; color: #94a3b8; font-style: italic; padding: 2rem;">Belum ada riwayat</div>
+                    </div>
                 </div>
             </div>
-        </aside>
 
+            <!-- History Detail Modal -->
+            <div id="history-detail-modal" class="modal-overlay">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3 style="font-size: 1.25rem; font-weight: bold;">Detail Perhitungan</h3>
+                        <button id="detail-close" class="modal-close">✕</button>
+                    </div>
+                    <div class="history-item-detail">
+                        <div class="history-expression" id="detail-expr"></div>
+                        <div class="history-result" id="detail-result"></div>
+                    </div>
+                    <div class="history-actions">
+                        <button id="detail-use" class="btn-use">Gunakan Hasil</button>
+                        <button id="detail-close-btn" class="btn-close">Tutup</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Kalkulator Unit -->
+            <div class="w-full max-w-[360px]">
+                <div class="flex flex-col rounded-3xl bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl shadow-2xl ring-1 ring-slate-900/5 dark:ring-white/10 overflow-hidden">
+                    
+                    <!-- Display -->
+                    <div class="display-section bg-transparent relative">
+                        <div id="memory-indicator" class="absolute top-2 left-6 text-xs font-bold text-primary opacity-0 transition-opacity">M</div>
+                        <div id="expression-display" class="expression-display">0</div>
+                        <input type="text" id="display" readonly class="main-display bg-transparent border-none text-slate-900 dark:text-white tracking-tight focus:ring-0 p-0 placeholder-slate-300" placeholder="0">
+                    </div>
+
+                    <!-- Memory Keys Row -->
+                    <div class="grid grid-cols-4 gap-2 px-4 pb-2">
+                        <button onclick="handleMemory('MC')" class="memory-button text-red-500 hover:bg-slate-100 dark:hover:bg-slate-800">MC</button>
+                        <button onclick="handleMemory('MR')" class="memory-button text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800">MR</button>
+                        <button onclick="handleMemory('M-')" class="memory-button text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800">M-</button>
+                        <button onclick="handleMemory('M+')" class="memory-button text-primary hover:bg-blue-50 dark:hover:bg-slate-800">M+</button>
+                    </div>
+
+                    <!-- Keypad -->
+                    <div class="grid grid-cols-4 gap-3 p-5 bg-slate-50/50 dark:bg-slate-900/50 border-t border-slate-100 dark:border-slate-800">
+                        <!-- Row 1 -->
+                        <button class="calculator-button bg-red-50 text-red-600 hover:bg-red-100 dark:bg-red-900/20 dark:text-red-400 dark:hover:bg-red-900/30 font-medium text-lg" onclick="clearAll()">C</button>
+                        <button class="calculator-button bg-slate-200 text-slate-700 hover:bg-slate-300 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 font-medium text-lg" onclick="clearEntry()">CE</button>
+                        <button class="calculator-button bg-slate-200 text-slate-700 hover:bg-slate-300 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700" onclick="appendOperator('%')">%</button>
+                        <button class="calculator-button bg-primary text-white hover:bg-primary-dark shadow-lg shadow-blue-500/30" onclick="appendOperator('/')">÷</button>
+                        
+                        <!-- Row 2 -->
+                        <button class="calculator-button bg-white text-slate-900 hover:bg-slate-50 dark:bg-slate-800/50 dark:text-white dark:hover:bg-slate-700 shadow-sm" onclick="appendNumber('7')">7</button>
+                        <button class="calculator-button bg-white text-slate-900 hover:bg-slate-50 dark:bg-slate-800/50 dark:text-white dark:hover:bg-slate-700 shadow-sm" onclick="appendNumber('8')">8</button>
+                        <button class="calculator-button bg-white text-slate-900 hover:bg-slate-50 dark:bg-slate-800/50 dark:text-white dark:hover:bg-slate-700 shadow-sm" onclick="appendNumber('9')">9</button>
+                        <button class="calculator-button bg-primary text-white hover:bg-primary-dark shadow-lg shadow-blue-500/30" onclick="appendOperator('*')">×</button>
+                        
+                        <!-- Row 3 -->
+                        <button class="calculator-button bg-white text-slate-900 hover:bg-slate-50 dark:bg-slate-800/50 dark:text-white dark:hover:bg-slate-700 shadow-sm" onclick="appendNumber('4')">4</button>
+                        <button class="calculator-button bg-white text-slate-900 hover:bg-slate-50 dark:bg-slate-800/50 dark:text-white dark:hover:bg-slate-700 shadow-sm" onclick="appendNumber('5')">5</button>
+                        <button class="calculator-button bg-white text-slate-900 hover:bg-slate-50 dark:bg-slate-800/50 dark:text-white dark:hover:bg-slate-700 shadow-sm" onclick="appendNumber('6')">6</button>
+                        <button class="calculator-button bg-primary text-white hover:bg-primary-dark shadow-lg shadow-blue-500/30" onclick="appendOperator('-')">-</button>
+                        
+                        <!-- Row 4 -->
+                        <button class="calculator-button bg-white text-slate-900 hover:bg-slate-50 dark:bg-slate-800/50 dark:text-white dark:hover:bg-slate-700 shadow-sm" onclick="appendNumber('1')">1</button>
+                        <button class="calculator-button bg-white text-slate-900 hover:bg-slate-50 dark:bg-slate-800/50 dark:text-white dark:hover:bg-slate-700 shadow-sm" onclick="appendNumber('2')">2</button>
+                        <button class="calculator-button bg-white text-slate-900 hover:bg-slate-50 dark:bg-slate-800/50 dark:text-white dark:hover:bg-slate-700 shadow-sm" onclick="appendNumber('3')">3</button>
+                        <button class="calculator-button bg-primary text-white hover:bg-primary-dark shadow-lg shadow-blue-500/30" onclick="appendOperator('+')">+</button>
+                        
+                        <!-- Row 5 -->
+                        <button class="calculator-button col-span-2 bg-white text-slate-900 hover:bg-slate-50 dark:bg-slate-800/50 dark:text-white dark:hover:bg-slate-700 shadow-sm" onclick="appendNumber('0')">0</button>
+                        <button class="calculator-button bg-white text-slate-900 hover:bg-slate-50 dark:bg-slate-800/50 dark:text-white dark:hover:bg-slate-700 shadow-sm" onclick="appendDecimal()">.</button>
+                        <button class="calculator-button bg-green-500 text-white hover:bg-green-600 shadow-lg shadow-green-500/30 font-bold" onclick="calculate()">=</button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </main>
+
+    <footer class="py-4 text-center">
+        <p class="text-xs text-slate-500 dark:text-slate-400 opacity-60">© 2025 KalkulatorKu - Dibuat Untuk Tugas Akhir Judul 5 Praktikum Pemrograman Web</p>
+    </footer>
+</div>
+
+<script>
+    // --- Manajemen State ---
+    let currentInput = '0';
+    let previousInput = '';
+    let operator = null;
+    let memory = 0;
+    let history = [];
+    let resetDisplay = false;
+
+    // --- Elemen DOM  ---
+    const displayEl = document.getElementById('display');
+    const expressionDisplayEl = document.getElementById('expression-display');
+    const memoryIndEl = document.getElementById('memory-indicator');
+    const historyModal = document.getElementById('history-modal');
+    const historyDetailModal = document.getElementById('history-detail-modal');
+    const historyListContainer = document.getElementById('history-list-container');
+
+    // --- Logika Utama ---
+
+    function updateDisplay() {
+        expressionDisplayEl.textContent = currentInput;
+        
+        setTimeout(() => {
+            expressionDisplayEl.scrollLeft = expressionDisplayEl.scrollWidth;
+        }, 0);
+        
+        const trimmedInput = currentInput.trim();
+        const operators = ['+', '-', '*', '/', '%'];
+        
+        let lastOperatorIndex = -1;
+        for (let i = trimmedInput.length - 1; i >= 0; i--) {
+            if (operators.includes(trimmedInput[i])) {
+                lastOperatorIndex = i;
+                break;
+            }
+        }
+        
+        let displayNumber = '';
+        if (lastOperatorIndex !== -1) {
+            displayNumber = trimmedInput.substring(lastOperatorIndex + 1).trim();
+        } else {
+            displayNumber = trimmedInput;
+        }
+        
+        if (!displayNumber || displayNumber === '') {
+            displayEl.value = '0';
+        } else {
+            const parts = displayNumber.split('.');
+            parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+            displayEl.value = parts.join('.');
+        }
+    }
+
+    function appendNumber(number) {
+        if (currentInput === '0' || resetDisplay) {
+            currentInput = number;
+            resetDisplay = false;
+        } else {
+            if(currentInput.replace(/[+\-*/%\s]/g, '').length < 50) {
+                currentInput += number;
+            }
+        }
+        updateDisplay();
+    }
+
+    function appendDecimal() {
+        if (resetDisplay) {
+            currentInput = '0.';
+            resetDisplay = false;
+        } else {
+            const operators = ['+', '-', '*', '/', '%'];
+            let lastOperatorIndex = -1;
+            for (let i = currentInput.length - 1; i >= 0; i--) {
+                if (operators.includes(currentInput[i])) {
+                    lastOperatorIndex = i;
+                    break;
+                }
+            }
+            
+            if (lastOperatorIndex !== -1) {
+                const afterOperator = currentInput.substring(lastOperatorIndex + 1).trim();
+                if (!afterOperator.includes('.')) {
+                    currentInput += '.';
+                }
+            } else {
+                if (!currentInput.includes('.')) {
+                    currentInput += '.';
+                }
+            }
+        }
+        updateDisplay();
+    }
+
+    function appendOperator(op) {
+        const trimmedInput = currentInput.trim();
+        
+        // Konversi persen ke desimal
+        if (op === '%') {
+            const lastChar = trimmedInput.slice(-1);
+            if (['+', '-', '*', '/', '%'].includes(lastChar)) {
+                return;
+            }
+            
+            const operators = ['+', '-', '*', '/'];
+            let lastOperatorIndex = -1;
+            for (let i = trimmedInput.length - 1; i >= 0; i--) {
+                if (operators.includes(trimmedInput[i])) {
+                    lastOperatorIndex = i;
+                    break;
+                }
+            }
+            
+            if (lastOperatorIndex !== -1) {
+                const beforeOp = trimmedInput.substring(0, lastOperatorIndex + 1).trim();
+                const numberPart = trimmedInput.substring(lastOperatorIndex + 1).trim();
+                const num = parseFloat(numberPart);
+                if (!isNaN(num)) {
+                    currentInput = beforeOp + ' ' + (num / 100);
+                }
+            } else {
+                const num = parseFloat(trimmedInput);
+                if (!isNaN(num)) {
+                    currentInput = (num / 100).toString();
+                }
+            }
+            resetDisplay = true;
+            updateDisplay();
+            return;
+        }
+        
+        // Mengatur operator lainnya
+        let lastChar = trimmedInput.slice(-1);
+        if (['+','-','*','/','%'].includes(lastChar)) {
+            currentInput = trimmedInput.slice(0, -1) + ' ' + op + ' ';
+        } else {
+            previousInput = currentInput; 
+            operator = op;
+            currentInput = trimmedInput + ' ' + op + ' '; 
+            resetDisplay = false;
+        }
+        updateDisplay();
+    }
+
+    function clearAll() {
+        currentInput = '0';
+        previousInput = '';
+        operator = null;
+        resetDisplay = false;
+        updateDisplay();
+    }
+
+    function clearEntry() {
+        const parts = currentInput.split(' ');
+        if (parts.length > 1) {
+            parts.pop(); 
+            if(parts[parts.length-1] === '') parts.pop(); 
+            currentInput = parts.join(' ') || '0';
+        } else {
+            currentInput = '0';
+        }
+        updateDisplay();
+    }
+
+    function calculate() {
+        try {
+            let expression = currentInput.replace(/×/g, '*').replace(/÷/g, '/');
+            
+            if (expression.includes('/ 0') || expression.includes('/0')) {
+                throw new Error("Cannot divide by zero");
+            }
+
+            if (/[^0-9+\-*/().\s%]/.test(expression)) {
+                throw new Error("Invalid Input");
+            }
+
+            expression = expression.replace(/(\d+(\.\d+)?)%/g, '($1/100)');
+
+            const result = new Function('return ' + expression)();
+            
+            const finalResult = Math.round(result * 100000000) / 100000000;
+
+            if (!isFinite(finalResult)) {
+                throw new Error("Error");
+            }
+
+            addToHistory(currentInput, finalResult);
+            currentInput = finalResult.toString();
+            previousInput = '';
+            operator = null;
+            resetDisplay = true; 
+            updateDisplay();
+
+        } catch (e) {
+            const originalInput = currentInput;
+            currentInput = "Error";
+            updateDisplay();
+            setTimeout(() => {
+                currentInput = originalInput;
+                if(e.message === "Cannot divide by zero") currentInput = '0'; 
+                updateDisplay();
+            }, 1500);
+        }
+    }
+
+    // --- Fungsi Memori ---
+    function handleMemory(action) {
+        const val = parseFloat(currentInput);
+        if (isNaN(val)) return;
+
+        switch(action) {
+            case 'M+':
+                memory += val;
+                resetDisplay = true;
+                break;
+            case 'M-':
+                memory -= val;
+                resetDisplay = true;
+                break;
+            case 'MR':
+                currentInput = memory.toString();
+                resetDisplay = true; 
+                updateDisplay();
+                break;
+            case 'MC':
+                memory = 0;
+                break;
+        }
+
+        if (memory !== 0) {
+            memoryIndEl.style.opacity = '1';
+        } else {
+            memoryIndEl.style.opacity = '0';
+        }
+    }
+
+    // --- Fungsi History ---
+    function addToHistory(expr, res) {
+        history.unshift({ expr: expr.trim(), res: res });
+        if (history.length > 20) history.pop(); // Menyimpan maksimal 20 riwayat
+        renderHistory();
+    }
+
+    function renderHistory() {
+        historyListContainer.innerHTML = '';
+        if (history.length === 0) {
+            historyListContainer.innerHTML = '<div style="grid-column: 1 / -1; text-align: center; color: #94a3b8; font-style: italic; padding: 2rem;">Belum ada riwayat</div>';
+            return;
+        }
+
+        history.forEach((item, index) => {
+            const card = document.createElement('div');
+            card.className = 'history-item-card';
+            card.innerHTML = `
+                <div class="history-item-card-expr">${item.expr}</div>
+                <div class="history-item-card-result">${formatNumber(item.res)}</div>
+            `;
+            card.onclick = () => showHistoryDetail(item);
+            historyListContainer.appendChild(card);
+        });
+    }
+
+    function formatNumber(num) {
+        const str = num.toString();
+        const parts = str.split('.');
+        parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+        return parts.join('.');
+    }
+
+    function showHistoryDetail(item) {
+        document.getElementById('detail-expr').textContent = item.expr + ' =';
+        document.getElementById('detail-result').textContent = formatNumber(item.res);
+        // Simpan item riwayat saat ini untuk digunakan di tombol
+        historyDetailModal.dataset.expression = item.expr;
+        historyDetailModal.classList.add('active');
+    }
+
+    function hideHistoryDetail() {
+        historyDetailModal.classList.remove('active');
+    }
+
+    function useHistoryExpression(expr) {
+        currentInput = expr;
+        resetDisplay = false; 
+        updateDisplay();
+        hideHistoryDetail();
+        hideHistoryModal();
+    }
+
+    function hideHistoryModal() {
+        historyModal.classList.remove('active');
+    }
+
+    // Modal Event Listeners
+    document.getElementById('history-toggle').addEventListener('click', () => {
+        historyModal.classList.add('active');
+    });
+
+    document.getElementById('modal-close').addEventListener('click', hideHistoryModal);
+    document.getElementById('detail-close').addEventListener('click', hideHistoryDetail);
+    document.getElementById('detail-close-btn').addEventListener('click', hideHistoryDetail);
+
+    document.getElementById('detail-use').addEventListener('click', () => {
+        const expression = historyDetailModal.dataset.expression;
+        useHistoryExpression(expression);
+    });
+
+    // Close modal ketika klik di luar konten
+    historyModal.addEventListener('click', (e) => {
+        if (e.target === historyModal) hideHistoryModal();
+    });
+
+    historyDetailModal.addEventListener('click', (e) => {
+        if (e.target === historyDetailModal) hideHistoryDetail();
+    });
+
+
+    // --- Event Keyboard ---
+    document.addEventListener('keydown', (e) => {
+        const key = e.key;
+        if (/[0-9]/.test(key)) appendNumber(key);
+        if (['+','-','*','/','%'].includes(key)) appendOperator(key);
+        if (key === 'Enter' || key === '=') {
+            e.preventDefault();
+            calculate();
+        }
+        if (key === 'Backspace') {
+            currentInput = currentInput.toString().slice(0, -1);
+            if(currentInput === '') currentInput = '0';
+            updateDisplay();
+        }
+        if (key === 'Escape') clearAll();
+        if (key === '.') appendDecimal();
+    });
+
+    const themeToggle = document.getElementById('theme-toggle');
+    const htmlEl = document.documentElement;
+
+    themeToggle.addEventListener('click', () => {
+        htmlEl.classList.toggle('dark');
+    });
+
+    updateDisplay();
+</script>
 </body>
 </html>
