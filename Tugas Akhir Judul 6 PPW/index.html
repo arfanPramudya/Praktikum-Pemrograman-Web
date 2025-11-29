@@ -27,14 +27,17 @@
         <div class="container mx-auto flex justify-between items-center">
             <div class="flex items-center gap-2">
                 <span class="material-symbols-outlined text-blue-500 text-3xl">cloud</span>
-                <h1 class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-500 to-cyan-400">Info Cuaca</h1>
+                <div>
+                    <h1 class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-500 to-cyan-400">Info Cuaca</h1>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">Powered by WeatherAPI.com</p>
+                </div>
             </div>
             
             <div class="flex items-center gap-3">
-                <button id="unit-toggle" class="px-3 py-1 rounded-full bg-gray-200 dark:bg-slate-700 text-sm font-semibold hover:bg-gray-300 dark:hover:bg-slate-600 transition">
+                <button id="unit-toggle" class="px-3 py-1 rounded-full bg-gray-200 dark:bg-slate-700 text-sm font-semibold hover:bg-gray-300 dark:hover:bg-slate-600 transition" title="Tukar antara Celsius dan Fahrenheit">
                     °C
                 </button>
-                <button id="theme-toggle" class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-slate-700 transition">
+                <button id="theme-toggle" class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-slate-700 transition" title="Tukar tema gelap/terang">
                     <span class="material-symbols-outlined dark:hidden">dark_mode</span>
                     <span class="material-symbols-outlined hidden dark:block text-yellow-400">light_mode</span>
                 </button>
@@ -50,17 +53,20 @@
                 <div class="relative">
                     <input type="text" id="city-input" placeholder="Masukkan nama kota..." 
                         class="w-full p-3 pl-10 rounded-lg bg-gray-50 dark:bg-slate-700 border-none focus:ring-2 focus:ring-blue-500 outline-none transition text-slate-900 dark:text-white"
-                        autocomplete="off">
+                        autocomplete="off" title="Cari kota berdasarkan nama">
                     <span class="material-symbols-outlined absolute left-3 top-3 text-gray-400">search</span>
                     
                     <ul id="suggestions" class="absolute z-10 w-full bg-white dark:bg-slate-700 shadow-xl rounded-lg mt-1 max-h-48 overflow-y-auto hidden"></ul>
                 </div>
                 <button id="search-btn" class="w-full mt-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 rounded-lg transition flex justify-center items-center gap-2">
-                    Cari
+                    <span class="material-symbols-outlined text-sm">search</span> Cari
                 </button>
-                <button id="geo-btn" class="w-full mt-2 bg-slate-200 dark:bg-slate-600 hover:bg-slate-300 dark:hover:bg-slate-500 text-slate-800 dark:text-white font-medium py-2 rounded-lg transition text-sm flex justify-center items-center gap-2">
+                <button id="geo-btn" class="w-full mt-2 bg-slate-200 dark:bg-slate-600 hover:bg-slate-300 dark:hover:bg-slate-500 text-slate-800 dark:text-white font-medium py-2 rounded-lg transition text-sm flex justify-center items-center gap-2" title="Gunakan lokasi GPS device Anda">
                     <span class="material-symbols-outlined text-sm">my_location</span> Lokasi Saya
                 </button>
+                <p class="text-xs text-gray-500 dark:text-gray-400 mt-3 p-2 bg-blue-50 dark:bg-blue-900/20 rounded">
+                    💡 <strong>Tips:</strong> Tekan Enter untuk cari, atau klik tombol di atas. Buka Console (F12) untuk debug info.
+                </p>
             </div>
 
             <div class="bg-white dark:bg-slate-800 p-4 rounded-xl shadow-lg">
@@ -78,10 +84,11 @@
             
             <div id="loading" class="hidden flex justify-center items-center py-10">
                 <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+                <span class="ml-3 text-slate-700 dark:text-gray-200">Mengambil data cuaca...</span>
             </div>
 
-            <div id="error-msg" class="hidden bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
-                <span class="block sm:inline" id="error-text">Something went wrong.</span>
+            <div id="error-msg" class="hidden bg-red-50 dark:bg-red-900/20 border-l-4 border-red-500 text-red-700 dark:text-red-300 px-6 py-4 rounded-r-lg shadow-md" role="alert">
+                <div id="error-text">Something went wrong.</div>
             </div>
 
             <div id="current-weather" class="bg-gradient-to-br from-blue-500 to-blue-700 text-white rounded-2xl shadow-xl p-6 relative overflow-hidden hidden">
@@ -135,9 +142,9 @@
     </main>
 
     <footer class="bg-white dark:bg-slate-800 border-t dark:border-slate-700 py-6 mt-8">
-        <div class="container mx-auto text-center text-gray-500 dark:text-gray-400 text-sm">
+        <div class="container mx-auto text-center text-gray-500 dark:text-gray-400 text-sm space-y-2">
             <p>&copy; 2025 Arfan Pramudya - Tugas Akhir Judul 6</p>
-            <p>Data provided by OpenWeatherMap</p>
+            <p>📊 Data & Cuaca: <a href="https://www.weatherapi.com" target="_blank" class="text-blue-500 hover:underline">WeatherAPI.com</a></p>
         </div>
     </footer>
 

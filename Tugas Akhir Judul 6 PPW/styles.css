@@ -1,0 +1,69 @@
+/* Bagian Animasi Loading */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.fade-in {
+    animation: fadeIn 0.5s ease-out forwards;
+}
+
+.animate-spin {
+    animation: spin 1s linear infinite;
+}
+
+/* Error Message */
+#error-msg {
+    animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+#error-text small {
+    display: block;
+    margin-top: 0.5rem;
+    opacity: 0.8;
+}
+
+/* Scrollbar*/
+#suggestions::-webkit-scrollbar {
+    width: 6px;
+}
+#suggestions::-webkit-scrollbar-track {
+    background: transparent;
+}
+#suggestions::-webkit-scrollbar-thumb {
+    background-color: #cbd5e1;
+    border-radius: 20px;
+}
+.dark #suggestions::-webkit-scrollbar-thumb {
+    background-color: #475569;
+}
+
+/* Glassmorphism utility */
+.glass {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Responsive untuk Mobile */
+@media (max-width: 640px) {
+    #error-msg {
+        margin: 0 -1rem;
+        border-radius: 0 0.5rem 0.5rem 0;
+    }
+}
