@@ -8,19 +8,6 @@
     to { transform: rotate(360deg); }
 }
 
-.fade-in {
-    animation: fadeIn 0.5s ease-out forwards;
-}
-
-.animate-spin {
-    animation: spin 1s linear infinite;
-}
-
-/* Error Message */
-#error-msg {
-    animation: slideDown 0.3s ease-out;
-}
-
 @keyframes slideDown {
     from {
         opacity: 0;
@@ -30,6 +17,55 @@
         opacity: 1;
         transform: translateY(0);
     }
+}
+
+.fade-in {
+    animation: fadeIn 0.5s ease-out forwards;
+}
+
+.animate-spin {
+    animation: spin 1s linear infinite;
+}
+
+/* Suggestion Box Styling */
+#suggestions {
+    animation: slideDown 0.2s ease-out;
+}
+
+#suggestions:not(.hidden) {
+    display: block !important;
+}
+
+#suggestions.hidden {
+    display: none !important;
+}
+
+.suggestion-item {
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.suggestion-item:hover {
+    background-color: #dbeafe;
+}
+
+.dark .suggestion-item:hover {
+    background-color: #334155;
+}
+
+.suggestion-item.bg-blue-100 {
+    background-color: #dbeafe;
+    border-left: 3px solid #2563eb;
+    padding-left: calc(1rem - 3px);
+}
+
+.dark .suggestion-item.dark\:bg-slate-600 {
+    background-color: #334155;
+}
+
+/* Error Message */
+#error-msg {
+    animation: slideDown 0.3s ease-out;
 }
 
 #error-text small {
@@ -47,10 +83,19 @@
 }
 #suggestions::-webkit-scrollbar-thumb {
     background-color: #cbd5e1;
-    border-radius: 20px;
+    border-radius: 3px;
 }
+
+#suggestions::-webkit-scrollbar-thumb:hover {
+    background-color: #94a3b8;
+}
+
 .dark #suggestions::-webkit-scrollbar-thumb {
     background-color: #475569;
+}
+
+.dark #suggestions::-webkit-scrollbar-thumb:hover {
+    background-color: #64748b;
 }
 
 /* Glassmorphism utility */
@@ -60,10 +105,24 @@
     border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
+/* Focus styles untuk accessibility */
+#city-input:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.dark #city-input:focus {
+    border-color: #60a5fa;
+}
+
 /* Responsive untuk Mobile */
 @media (max-width: 640px) {
     #error-msg {
         margin: 0 -1rem;
         border-radius: 0 0.5rem 0.5rem 0;
+    }
+    
+    #suggestions {
+        max-height: 300px;
     }
 }

@@ -1,6 +1,6 @@
 // --- Bagian Konfigurasi ---
-const API_KEY = 'ec843ff1ff304a60853102316252911'; // GANTI DENGAN API KEY ANDA
-const BASE_URL = 'https://api.weatherapi.com/v1';
+const API_KEY = import.meta.env.VITE_API_KEY || 'placeholder_key_from_env';
+const BASE_URL = import.meta.env.VITE_BASE_URL || 'https://api.weatherapi.com/v1';
 
 // Pesan Troubleshooting
 const ERROR_MESSAGES = {
@@ -25,6 +25,8 @@ let currentCity = 'Bandar Lampung';
 let unit = localStorage.getItem('unit') || 'metric'; // 'metric' (C) or 'imperial' (F)
 let favorites = JSON.parse(localStorage.getItem('favorites')) || [];
 let autoRefreshInterval;
+let searchDebounceTimer;
+let currentSuggestionIndex = -1;
 
 // --- DOM ELEMENTS ---
 const cityInput = document.getElementById('city-input');
@@ -53,11 +55,103 @@ function logError(title, error) {
     }
 }
 
+// --- SECURITY UTILITIES ---
+/**
+ * Escape HTML special characters
+ * @param {string} text - Text yang di-escape
+ * @returns {string} Escaped text
+ */
+function escapeHtml(text) {
+    if (typeof text !== 'string') return '';
+    
+    const map = {
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#039;'
+    };
+    return text.replace(/[&<>"']/g, (char) => map[char]);
+}
+
+/**
+ * Sanitasi input 
+ * @param {string} city - City name input
+ * @returns {string} Sanitized city name
+ */
+function sanitizeCityInput(city) {
+    if (typeof city !== 'string') return '';
+    
+    // Remove leading/trailing whitespace
+    let sanitized = city.trim();
+    
+    // Limit length to 100 characters
+    if (sanitized.length > 100) {
+        sanitized = sanitized.substring(0, 100);
+    }
+    sanitized = sanitized.replace(/[^a-zA-Z0-9\s\-,()]/gi, '');
+    
+    sanitized = sanitized.replace(/\s{2,}/g, ' ').trim();
+    
+    return sanitized;
+}
+
+/**
+ * Validate city input sebelum  API request
+ * @param {string} city - City name
+ * @returns {object} {valid: boolean, error: string|null}
+ */
+function validateCityInput(city) {
+    if (!city || typeof city !== 'string') {
+        return { valid: false, error: '❌ Masukkan nama kota yang valid' };
+    }
+    
+    const trimmed = city.trim();
+    
+    if (trimmed.length === 0) {
+        return { valid: false, error: '❌ Nama kota tidak boleh kosong' };
+    }
+    
+    if (trimmed.length < 2) {
+        return { valid: false, error: '❌ Nama kota minimal 2 karakter' };
+    }
+    
+    if (trimmed.length > 100) {
+        return { valid: false, error: '❌ Nama kota tidak boleh lebih dari 100 karakter' };
+    }
+    
+    // Check for suspicious patterns
+    if (/^['"]|['"]$/.test(trimmed)) {
+        return { valid: false, error: '❌ Input tidak valid - hapus tanda kutip' };
+    }
+    
+    return { valid: true, error: null };
+}
+
+/**
+ * Validate API response data structure
+ * @param {object} data - Response dari API
+ * @returns {boolean} Valid or not
+ */
+function validateApiResponse(data) {
+    if (!data || typeof data !== 'object') {
+        return false;
+    }
+    
+    // Check if response is error response
+    if (data.error) {
+        return false;
+    }
+    
+    return true;
+}
+
 // --- Inisialisasi ---
 document.addEventListener('DOMContentLoaded', () => {
     logDebug('=== Aplikasi Weather Dashboard Dimulai ===');
     logDebug(`API Base URL: ${BASE_URL}`);
     logDebug(`API Key Status: ${API_KEY === 'YOUR_API_KEY_HERE' ? '⚠️ BELUM DIKONFIGURASI' : '✅ Configured'}`);
+    logDebug('🔒 Security: Input validation & XSS protection aktif');
     
     loadTheme();
     updateUnitLabel();
@@ -92,25 +186,205 @@ function updateUnitLabel() {
     unitToggle.textContent = unit === 'metric' ? '°C' : '°F';
 }
 
-// --- SEARCH FUNCTIONALITY ---
+// --- FITUR SEARCH ---
 searchBtn.addEventListener('click', () => {
     const city = cityInput.value.trim();
-    if (city) fetchWeather(city);
+    
+    // Validate input
+    const validation = validateCityInput(city);
+    if (!validation.valid) {
+        showError(true, validation.error);
+        logError('Input Validation Failed:', validation.error);
+        return;
+    }
+    
+    const sanitized = sanitizeCityInput(city);
+    suggestionsList.classList.add('hidden'); // Hide suggestions saat search
+    fetchWeather(sanitized);
 });
 
-cityInput.addEventListener('keyup', (e) => {
-    if (e.key === 'Enter') {
-        const city = cityInput.value.trim();
-        if (city) fetchWeather(city);
+// Autocomplete dengan metode debounce
+cityInput.addEventListener('input', (e) => {
+    clearTimeout(searchDebounceTimer);
+    const query = cityInput.value.trim();
+    currentSuggestionIndex = -1; // Reset index
+    
+    // Validasi input
+    if (!query || query.length < 1) {
         suggestionsList.classList.add('hidden');
-    } else {
-        // Simple autocomplete simulation (debounce would be better for production)
-        if (cityInput.value.length > 2) {
-             // Di aplikasi nyata, panggil API geo/direct di sini
-             // Untuk tugas ini, kita hanya menampilkan UI logic atau ambil dari favorites
+        return;
+    }
+    
+    const validation = validateCityInput(query);
+    if (!validation.valid) {
+        suggestionsList.classList.add('hidden');
+        return;
+    }
+    
+    // Debounce API call (tunggu 300ms setelah user berhenti typing)
+    searchDebounceTimer = setTimeout(() => {
+        searchCityLocations(query);
+    }, 300);
+});
+
+// Keyboard navigation untuk suggestions
+cityInput.addEventListener('keydown', (e) => {
+    const items = Array.from(suggestionsList.querySelectorAll('li'));
+    
+    if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        currentSuggestionIndex = Math.min(currentSuggestionIndex + 1, items.length - 1);
+        updateSuggestionSelection(items);
+    } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        currentSuggestionIndex = Math.max(currentSuggestionIndex - 1, -1);
+        updateSuggestionSelection(items);
+    } else if (e.key === 'Enter') {
+        e.preventDefault();
+        if (currentSuggestionIndex >= 0 && items[currentSuggestionIndex]) {
+            items[currentSuggestionIndex].click();
+        } else {
+            // Jika tidak ada selection, search dengan input current
+            const city = cityInput.value.trim();
+            const validation = validateCityInput(city);
+            if (validation.valid) {
+                const sanitized = sanitizeCityInput(city);
+                suggestionsList.classList.add('hidden');
+                fetchWeather(sanitized);
+            }
         }
+    } else if (e.key === 'Escape') {
+        suggestionsList.classList.add('hidden');
     }
 });
+
+/**
+ * Search city locations menggunakan WeatherAPI Search API
+ * @param {string} query - Search query
+ */
+async function searchCityLocations(query) {
+    try {
+        const encodedQuery = encodeURIComponent(query);
+        const searchUrl = `${BASE_URL}/search.json?key=${API_KEY}&q=${encodedQuery}&lang=id`;
+        
+        logDebug(`🔍 Searching for: ${query}`);
+        
+        const response = await fetch(searchUrl);
+        
+        if (!response.ok) {
+            logError('Search API Error:', response.status);
+            suggestionsList.classList.add('hidden');
+            return;
+        }
+        
+        const data = await response.json();
+        
+        // Validate response
+        if (!Array.isArray(data) || data.length === 0) {
+            renderNoSuggestions();
+            return;
+        }
+        
+        // Render suggestions
+        renderSuggestions(data);
+        
+    } catch (error) {
+        logError('Search Locations Error:', error);
+        suggestionsList.classList.add('hidden');
+    }
+}
+
+/**
+ * Render suggestions list
+ * @param {array} locations - Array of location objects
+ */
+function renderSuggestions(locations) {
+    suggestionsList.innerHTML = '';
+    
+    if (!Array.isArray(locations) || locations.length === 0) {
+        renderNoSuggestions();
+        return;
+    }
+    
+    // Batasi hingga 8 saran lokasi
+    const limitedLocations = locations.slice(0, 8);
+    
+    limitedLocations.forEach((location, index) => {
+        try {
+            // Sanitize location data
+            const name = escapeHtml(location.name || '');
+            const region = location.region ? escapeHtml(location.region) : '';
+            const country = escapeHtml(location.country || '');
+            
+            const li = document.createElement('li');
+            li.className = 'suggestion-item px-4 py-3 hover:bg-blue-50 dark:hover:bg-slate-700 cursor-pointer transition border-b dark:border-slate-600 last:border-b-0';
+            li.setAttribute('data-index', index);
+            
+            // Create display text
+            let displayText = name;
+            if (region) {
+                displayText += `, ${region}`;
+            }
+            if (country) {
+                displayText += `, ${country}`;
+            }
+            
+            // Create main span
+            const mainSpan = document.createElement('span');
+            mainSpan.className = 'block font-medium text-slate-800 dark:text-slate-200';
+            mainSpan.textContent = displayText;
+            
+            // Create secondary info
+            const infoSpan = document.createElement('span');
+            infoSpan.className = 'text-xs text-slate-500 dark:text-slate-400 block mt-1';
+            infoSpan.textContent = `📍 Lat: ${location.lat.toFixed(2)}, Lon: ${location.lon.toFixed(2)}`;
+            
+            li.appendChild(mainSpan);
+            li.appendChild(infoSpan);
+            
+            // Add click event
+            li.addEventListener('click', () => {
+                cityInput.value = name;
+                suggestionsList.classList.add('hidden');
+                fetchWeather(name);
+            });
+            
+            suggestionsList.appendChild(li);
+        } catch (e) {
+            logError('Error rendering suggestion at index', index, e);
+        }
+    });
+    
+    suggestionsList.classList.remove('hidden');
+}
+
+/**
+ * Render "no suggestions found" message
+ */
+function renderNoSuggestions() {
+    suggestionsList.innerHTML = '';
+    const li = document.createElement('li');
+    li.className = 'px-4 py-3 text-center text-gray-500 dark:text-gray-400';
+    li.textContent = '❌ Lokasi tidak ditemukan. Coba nama lain.';
+    suggestionsList.appendChild(li);
+    suggestionsList.classList.remove('hidden');
+}
+
+/**
+ * Update visual selection saat keyboard navigation
+ * @param {array} items - List of suggestion items
+ */
+function updateSuggestionSelection(items) {
+    // Remove previous selection
+    items.forEach((item, idx) => {
+        if (idx === currentSuggestionIndex) {
+            item.classList.add('bg-blue-100', 'dark:bg-slate-600');
+            item.scrollIntoView({ block: 'nearest' });
+        } else {
+            item.classList.remove('bg-blue-100', 'dark:bg-slate-600');
+        }
+    });
+}
 
 // --- API FETCHING (AJAX) ---
 async function fetchWeather(city) {
@@ -119,6 +393,12 @@ async function fetchWeather(city) {
     logDebug(`Mencari cuaca untuk: ${city}`);
     
     try {
+        // Validasi input sekali lagi sebelum fetch
+        const validation = validateCityInput(city);
+        if (!validation.valid) {
+            throw { code: 1003, message: validation.error };
+        }
+
         // Validasi API Key
         if (API_KEY === 'YOUR_API_KEY_HERE') {
             throw {
@@ -127,9 +407,12 @@ async function fetchWeather(city) {
             };
         }
 
+        // Encode city name untuk URL safety
+        const encodedCity = encodeURIComponent(city);
+        
         // 1. Get Current Weather menggunakan WeatherAPI.com
-        const currentUrl = `${BASE_URL}/current.json?key=${API_KEY}&q=${encodeURIComponent(city)}&aqi=yes&lang=id`;
-        logDebug(`Request URL: ${currentUrl}`);
+        const currentUrl = `${BASE_URL}/current.json?key=${API_KEY}&q=${encodedCity}&aqi=yes&lang=id`;
+        logDebug(`Request URL (sanitized): ${currentUrl}`);
         
         const currentRes = await fetch(currentUrl);
         
@@ -153,8 +436,16 @@ async function fetchWeather(city) {
             };
         });
 
+        // Validate API response structure
+        if (!validateApiResponse(currentData)) {
+            throw {
+                code: 'parse',
+                message: '❌ Response dari API tidak valid atau error'
+            };
+        }
+
         // 2. Get Forecast (5 hari ke depan)
-        const forecastUrl = `${BASE_URL}/forecast.json?key=${API_KEY}&q=${encodeURIComponent(city)}&days=5&aqi=yes&alerts=yes&lang=id`;
+        const forecastUrl = `${BASE_URL}/forecast.json?key=${API_KEY}&q=${encodedCity}&days=5&aqi=yes&alerts=yes&lang=id`;
         const forecastRes = await fetch(forecastUrl);
         
         if (!forecastRes.ok) {
@@ -171,12 +462,20 @@ async function fetchWeather(city) {
             };
         });
 
-        // 3. Update UI
-        currentCity = currentData.location.name;
+        // Validate forecast response
+        if (!validateApiResponse(forecastData)) {
+            throw {
+                code: 'parse',
+                message: '❌ Response forecast dari API tidak valid'
+            };
+        }
+
+        // 3. Update UI dengan data yang sudah divalidasi
+        currentCity = currentData.location.name; // API returns safe data
         updateCurrentUI(currentData);
         updateForecastUI(forecastData.forecast.forecastday);
         checkFavoriteStatus();
-        logDebug(`✅ Data cuaca berhasil dimuat untuk: ${currentCity}`);
+        logDebug(`✅ Data cuaca berhasil dimuat untuk: ${escapeHtml(currentCity)}`);
         
     } catch (error) {
         let errorMessage = error.message;
@@ -206,7 +505,11 @@ function updateCurrentUI(data) {
     const location = data.location;
     const current = data.current;
 
-    document.getElementById('current-city').textContent = `${location.name}, ${location.country}`;
+    // Escape location data untuk XSS protection
+    const cityName = escapeHtml(location.name);
+    const countryName = escapeHtml(location.country);
+    
+    document.getElementById('current-city').textContent = `${cityName}, ${countryName}`;
     document.getElementById('current-date').textContent = current.last_updated || new Date().toLocaleString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' });
     
     // Sesuaikan temperature unit
@@ -214,16 +517,26 @@ function updateCurrentUI(data) {
     document.getElementById('current-temp').textContent = temp;
     document.getElementById('temp-unit').textContent = unit === 'metric' ? '°C' : '°F';
     
-    document.getElementById('weather-desc').textContent = current.condition.text;
-    document.getElementById('weather-icon').src = `https:${current.condition.icon}`; // WeatherAPI icon format
+    // Escape weather description
+    const weatherDesc = escapeHtml(current.condition.text);
+    document.getElementById('weather-desc').textContent = weatherDesc;
+    
+    // Validate icon URL sebelum digunakan
+    const iconUrl = current.condition.icon;
+    if (iconUrl && typeof iconUrl === 'string' && iconUrl.startsWith('//')) {
+        document.getElementById('weather-icon').src = `https:${iconUrl}`;
+    } else {
+        logError('Invalid icon URL:', iconUrl);
+        document.getElementById('weather-icon').src = ''; // Fallback
+    }
     
     document.getElementById('current-humidity').textContent = `${current.humidity}%`;
     const windSpeed = unit === 'metric' ? Math.round(current.wind_kph * 0.277778) : Math.round(current.wind_mph);
     document.getElementById('current-wind').textContent = `${windSpeed} ${unit === 'metric' ? 'm/s' : 'mph'}`;
     document.getElementById('current-visibility').textContent = `${unit === 'metric' ? current.vis_km : current.vis_miles} ${unit === 'metric' ? 'km' : 'mi'}`;
     
-    // Tampilkan Air Quality
-    if (current.air_quality) {
+    // Tampilkan Air Quality jika tersedia
+    if (current.air_quality && typeof current.air_quality === 'object') {
         const aqi = current.air_quality['us-epa-index'];
         const aqiText = ['', 'Baik', 'Sedang', 'Tidak Sehat (Sensitif)', 'Tidak Sehat', 'Sangat Tidak Sehat', 'Berbahaya'][aqi];
         logDebug(`Air Quality: ${aqiText} (EPA Index: ${aqi})`);
@@ -234,29 +547,55 @@ function updateForecastUI(forecastDays) {
     const container = document.getElementById('forecast-container');
     container.innerHTML = ''; // Clear old data
 
+    // Validate forecastDays is array
+    if (!Array.isArray(forecastDays)) {
+        logError('Invalid forecast data:', forecastDays);
+        return;
+    }
+
     // WeatherAPI.com memberikan prediksi 5 hari kedepan
     forecastDays.slice(0, 5).forEach((day, index) => {
-        const date = new Date(day.date);
-        const dayName = date.toLocaleDateString('id-ID', { weekday: 'short' });
-        const dateStr = date.toLocaleDateString('id-ID', { day: 'numeric', month: 'short' });
-        
-        const card = document.createElement('div');
-        card.className = `bg-white dark:bg-slate-800 p-4 rounded-xl shadow-md text-center border border-gray-100 dark:border-slate-700 fade-in`;
-        card.style.animationDelay = `${index * 100}ms`;
-        
-        const tempC = Math.round(day.day.avgtemp_c);
-        const tempF = Math.round(day.day.avgtemp_f);
-        const temp = unit === 'metric' ? tempC : tempF;
-        
-        card.innerHTML = `
-            <p class="font-bold text-slate-700 dark:text-slate-200">${dayName}</p>
-            <p class="text-xs text-gray-500 mb-2">${dateStr}</p>
-            <img src="https:${day.day.condition.icon}" class="w-12 h-12 mx-auto" alt="Weather icon">
-            <p class="text-sm font-medium capitalize text-slate-600 dark:text-slate-300 h-10 flex items-center justify-center">${day.day.condition.text}</p>
-            <p class="font-bold text-lg mt-2 text-slate-800 dark:text-white">${temp}°</p>
-            <p class="text-xs text-gray-500 mt-1">💧 ${day.day.avghumidity}%</p>
-        `;
-        container.appendChild(card);
+        try {
+            // Validate day object
+            if (!day || !day.date || !day.day || !day.day.condition) {
+                logError('Invalid day data at index:', index);
+                return;
+            }
+
+            const date = new Date(day.date);
+            const dayName = date.toLocaleDateString('id-ID', { weekday: 'short' });
+            const dateStr = date.toLocaleDateString('id-ID', { day: 'numeric', month: 'short' });
+            
+            const card = document.createElement('div');
+            card.className = `bg-white dark:bg-slate-800 p-4 rounded-xl shadow-md text-center border border-gray-100 dark:border-slate-700 fade-in`;
+            card.style.animationDelay = `${index * 100}ms`;
+            
+            const tempC = Math.round(day.day.avgtemp_c);
+            const tempF = Math.round(day.day.avgtemp_f);
+            const temp = unit === 'metric' ? tempC : tempF;
+            
+            // Escape condition text
+            const conditionText = escapeHtml(day.day.condition.text);
+            
+            // Validate icon URL
+            const iconUrl = day.day.condition.icon;
+            let iconSrc = '';
+            if (iconUrl && typeof iconUrl === 'string' && iconUrl.startsWith('//')) {
+                iconSrc = `https:${iconUrl}`;
+            }
+            
+            card.innerHTML = `
+                <p class="font-bold text-slate-700 dark:text-slate-200">${escapeHtml(dayName)}</p>
+                <p class="text-xs text-gray-500 mb-2">${escapeHtml(dateStr)}</p>
+                <img src="${escapeHtml(iconSrc)}" class="w-12 h-12 mx-auto" alt="Weather icon" onerror="this.style.display='none'">
+                <p class="text-sm font-medium capitalize text-slate-600 dark:text-slate-300 h-10 flex items-center justify-center">${conditionText}</p>
+                <p class="font-bold text-lg mt-2 text-slate-800 dark:text-white">${temp}°</p>
+                <p class="text-xs text-gray-500 mt-1">💧 ${day.day.avghumidity}%</p>
+            `;
+            container.appendChild(card);
+        } catch (e) {
+            logError('Error rendering forecast card at index', index, e);
+        }
     });
     
     logDebug(`✅ Forecast untuk 5 hari berhasil ditampilkan`);
@@ -318,25 +657,69 @@ function renderFavorites() {
         return;
     }
 
-    favorites.forEach(city => {
+    favorites.forEach((city, index) => {
+        // Validate and sanitize city name
+        if (typeof city !== 'string' || city.trim().length === 0) {
+            logError('Invalid city in favorites:', city);
+            return;
+        }
+
         const li = document.createElement('li');
         li.className = 'flex justify-between items-center bg-gray-50 dark:bg-slate-700 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-600 cursor-pointer transition';
-        li.innerHTML = `
-            <span onclick="fetchWeather('${city}')" class="flex-grow font-medium text-slate-700 dark:text-slate-200">${city}</span>
-            <button onclick="removeFavorite('${city}')" class="text-gray-400 hover:text-red-500">
-                <span class="material-symbols-outlined text-sm">close</span>
-            </button>
-        `;
+        
+        // Create span for city name - use textContent untuk XSS prevention
+        const citySpan = document.createElement('span');
+        citySpan.className = 'flex-grow font-medium text-slate-700 dark:text-slate-200';
+        citySpan.textContent = city; // Using textContent instead of innerHTML
+        citySpan.style.cursor = 'pointer';
+        
+        // Add click event listener (safer than inline onclick)
+        citySpan.addEventListener('click', () => {
+            fetchWeather(city);
+        });
+        
+        // Create remove button
+        const removeBtn = document.createElement('button');
+        removeBtn.className = 'text-gray-400 hover:text-red-500 transition';
+        removeBtn.setAttribute('data-city-index', index);
+        removeBtn.setAttribute('title', `Hapus ${city} dari favorit`);
+        
+        // Create icon span
+        const iconSpan = document.createElement('span');
+        iconSpan.className = 'material-symbols-outlined text-sm';
+        iconSpan.textContent = 'close';
+        
+        removeBtn.appendChild(iconSpan);
+        
+        // Add click event listener untuk remove
+        removeBtn.addEventListener('click', (e) => {
+            e.stopPropagation(); // Prevent triggering parent click
+            removeFavoriteItem(city);
+        });
+        
+        li.appendChild(citySpan);
+        li.appendChild(removeBtn);
         favoriteList.appendChild(li);
     });
 }
 
-window.removeFavorite = (city) => {
+// New function untuk remove favorite dengan proper validation
+function removeFavoriteItem(city) {
+    if (typeof city !== 'string' || city.trim().length === 0) {
+        logError('Invalid city to remove:', city);
+        return;
+    }
+
     favorites = favorites.filter(c => c !== city);
     localStorage.setItem('favorites', JSON.stringify(favorites));
     renderFavorites();
-    if (currentCity === city) checkFavoriteStatus();
-};
+    
+    if (currentCity === city) {
+        checkFavoriteStatus();
+    }
+    
+    logDebug(`✅ Dihapus dari favorit: ${escapeHtml(city)}`);
+}
 
 // --- AUTO UPDATE (Real-time every 5 mins) ---
 function startAutoRefresh() {
@@ -379,13 +762,39 @@ document.getElementById('geo-btn').addEventListener('click', () => {
 });
 
 async function fetchWeatherByCoords(lat, lon) {
+    // Validate latitude and longitude
+    if (typeof lat !== 'number' || typeof lon !== 'number') {
+        showError(true, '❌ Koordinat tidak valid');
+        logError('Invalid coordinates:', { lat, lon });
+        return;
+    }
+
+    if (lat < -90 || lat > 90 || lon < -180 || lon > 180) {
+        showError(true, '❌ Koordinat di luar jangkauan');
+        logError('Coordinates out of range:', { lat, lon });
+        return;
+    }
+
     // lat/lon langsung ke API WeatherAPI.com
     logDebug(`Menggunakan Geolocation: Lat ${lat}, Lon ${lon}`);
-     try {
+    
+    try {
         const res = await fetch(`${BASE_URL}/current.json?key=${API_KEY}&q=${lat},${lon}&aqi=yes&lang=id`);
         if (!res.ok) throw new Error('Gagal mengambil data geolocation');
+        
         const data = await res.json();
-        fetchWeather(data.location.name); // Redirect to main fetch by name untuk konsistensi
+        
+        // Validate response
+        if (!validateApiResponse(data)) {
+            throw new Error('Response data tidak valid');
+        }
+
+        const cityName = data.location.name;
+        if (typeof cityName !== 'string' || cityName.trim().length === 0) {
+            throw new Error('Nama kota tidak valid dari response');
+        }
+
+        fetchWeather(cityName);
      } catch(e) { 
         logError('Geolocation Fetch Error:', e);
         showError(true, ERROR_MESSAGES['network'] + ' (Geolocation)');

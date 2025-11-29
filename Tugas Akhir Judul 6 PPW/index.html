@@ -49,29 +49,35 @@
         
         <aside class="lg:col-span-1 space-y-6">
             <div class="bg-white dark:bg-slate-800 p-4 rounded-xl shadow-lg">
-                <label class="block text-sm font-medium mb-2 text-slate-500 dark:text-slate-400">Cari Kota</label>
+                <label class="block text-sm font-medium mb-2 text-slate-500 dark:text-slate-400">🔍 Cari Kota</label>
                 <div class="relative">
-                    <input type="text" id="city-input" placeholder="Masukkan nama kota..." 
-                        class="w-full p-3 pl-10 rounded-lg bg-gray-50 dark:bg-slate-700 border-none focus:ring-2 focus:ring-blue-500 outline-none transition text-slate-900 dark:text-white"
-                        autocomplete="off" title="Cari kota berdasarkan nama">
+                    <input type="text" id="city-input" placeholder="Ketik nama kota (mis: Jakarta)..." 
+                        class="w-full p-3 pl-10 rounded-lg bg-gray-50 dark:bg-slate-700 border-2 border-transparent focus:border-blue-500 focus:ring-0 outline-none transition text-slate-900 dark:text-white placeholder:text-gray-400"
+                        autocomplete="off" title="Cari kota - mulai ketik untuk melihat saran lokasi">
                     <span class="material-symbols-outlined absolute left-3 top-3 text-gray-400">search</span>
                     
-                    <ul id="suggestions" class="absolute z-10 w-full bg-white dark:bg-slate-700 shadow-xl rounded-lg mt-1 max-h-48 overflow-y-auto hidden"></ul>
+                    <ul id="suggestions" class="absolute z-20 w-full bg-white dark:bg-slate-700 shadow-2xl rounded-lg mt-2 max-h-72 overflow-y-auto hidden border border-gray-200 dark:border-slate-600">
+                        <!-- Suggestions will be rendered here by JavaScript -->
+                    </ul>
                 </div>
-                <button id="search-btn" class="w-full mt-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 rounded-lg transition flex justify-center items-center gap-2">
-                    <span class="material-symbols-outlined text-sm">search</span> Cari
+                <button id="search-btn" class="w-full mt-3 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold py-2 rounded-lg transition flex justify-center items-center gap-2 shadow-md">
+                    <span class="material-symbols-outlined text-sm">search</span> Cari Cuaca
                 </button>
-                <button id="geo-btn" class="w-full mt-2 bg-slate-200 dark:bg-slate-600 hover:bg-slate-300 dark:hover:bg-slate-500 text-slate-800 dark:text-white font-medium py-2 rounded-lg transition text-sm flex justify-center items-center gap-2" title="Gunakan lokasi GPS device Anda">
+                <button id="geo-btn" class="w-full mt-2 bg-slate-200 dark:bg-slate-600 hover:bg-slate-300 dark:hover:bg-slate-500 text-slate-800 dark:text-white font-medium py-2 rounded-lg transition text-sm flex justify-center items-center gap-2 shadow-md" title="Gunakan lokasi GPS device Anda">
                     <span class="material-symbols-outlined text-sm">my_location</span> Lokasi Saya
                 </button>
-                <p class="text-xs text-gray-500 dark:text-gray-400 mt-3 p-2 bg-blue-50 dark:bg-blue-900/20 rounded">
-                    💡 <strong>Tips:</strong> Tekan Enter untuk cari, atau klik tombol di atas. Buka Console (F12) untuk debug info.
+                <p class="text-xs text-gray-500 dark:text-gray-400 mt-3 p-2 bg-blue-50 dark:bg-blue-900/20 rounded border-l-2 border-blue-500">
+                    💡 <strong>Tips:</strong> 
+                    <br>• Ketik untuk melihat saran lokasi
+                    <br>• ⬆️⬇️ Navigasi dengan arrow keys
+                    <br>• Enter untuk memilih atau cari
+                    <br>• Esc untuk tutup saran
                 </p>
             </div>
 
             <div class="bg-white dark:bg-slate-800 p-4 rounded-xl shadow-lg">
                 <div class="flex justify-between items-center mb-3">
-                    <h3 class="font-semibold">Kota Favorit</h3>
+                    <h3 class="font-semibold text-slate-800 dark:text-white">⭐ Kota Favorit</h3>
                     <span class="material-symbols-outlined text-red-500 text-sm">favorite</span>
                 </div>
                 <ul id="favorite-list" class="space-y-2">
@@ -148,6 +154,7 @@
         </div>
     </footer>
 
-    <script src="script.js"></script>
+    <!-- Load script as ES module to support environment variables -->
+    <script type="module" src="script.js"></script>
 </body>
 </html>
